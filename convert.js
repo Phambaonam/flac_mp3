@@ -11,25 +11,26 @@ const spawn = require('child_process').spawn;
  * @param outputFile
  * @param callback hàm call back sau khi convert xong
  */
+
 function flacToMp3(inputFile, outputFile, callback) {
-  const converter = spawn('ffmpeg', ['-y', '-i', inputFile, '-ab', '320k', '-map_metadata', '0', '-id3v2_version', '3', outputFile]);
+    const converter = spawn('ffmpeg', ['-y', '-i', inputFile, '-ab', '320k', '-map_metadata', '0', '-id3v2_version', '3', outputFile]);
 
-  converter.stdout.on('data', (data) => {
-    console.log(`stdout: ${data}`);
-  });
+    converter.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+    });
 
-  converter.stderr.on('data', (data) => {
-    console.log(`stderr: ${data}`);
-  });
+    converter.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+    });
 
-  converter.on('close', (code) => {
-    if (code === 0) {
-      callback(inputFile);
-    }
-  });
+    converter.on('close', (code) => {
+        if (code === 0) {
+            callback(inputFile);
+        }
+    });
 }
 
 flacToMp3('demo.flac', 'demo.mp3', (inputFile) => {
-  console.log(`${inputFile} is converted`);
+    console.log(`${inputFile} is converted`);
 });
 
