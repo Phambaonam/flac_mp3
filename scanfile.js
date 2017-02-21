@@ -1,5 +1,82 @@
 //TODO: Hãy viết lệnh để liệt kê tất cả các file phù hợp với một pattern đề ra trả về danh sách các file quét được
 //
-class ScanFile {
+const fs = require('fs');
+const path = require('path');
+const Promise = require('bluebird');
 
-}
+exports.ScanFile = class {
+
+    /*** Constructor
+     * @param sourceFolder đường dẫn tới thư mục file flac
+     *
+     */
+    constructor(sourceFolder) {
+        this.srcFolder = sourceFolder;
+    }
+
+    /***
+     * Hàm liệt kê danh sách file
+     * @param dir
+     * @param files_
+     * @returns {*|Array}
+     */
+    getFiles(dir, files_) {
+        files_ = files_ || [];
+        let files = fs.readdirSync(dir);
+        for (let i in files) {
+            let name = dir + '/' + files[i];
+            if (fs.statSync(name).isDirectory()) {
+                this.getFiles(name, files_);
+            } else {
+                files_.push(name);
+            }
+        }
+        return files_;
+    }
+
+    /***
+     * Hàm kiểm tra file .flac
+     * @param file
+     * @returns {*}
+     */
+
+    checkFlac(file, extname) {
+        if (path.extname(file) === extname) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /***
+     * Hàm liệt kê danh sách .flac file
+     * @param dir
+     * @returns {Array}
+     */
+
+    addFlac(dir, check) {
+        return new Promise((resolve, reject) => {
+            let allFiles = this.getFiles(dir);
+            //console.log(allFiles);
+            let flacFiles = [];
+            allFiles.forEach(file => {
+                if (check(file, '.flac')) {
+                    flacFiles.push(file);
+                }
+            });
+            resolve(flacFiles);
+        });
+    }
+
+    /***
+     * Hàm hứng kết quả trả về từ hàm addFlac
+     * @param dir
+     * @returns {Promise.<Array>}
+     */
+    async listAllFlac(dir) {
+        let arrFlac = await this.addFlac(dir, this.checkFlac);
+        return arrFlac;
+    }
+};
+
+

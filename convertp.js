@@ -1,11 +1,10 @@
 /***
  * Sử dụng BlueBird promise
  */
-
 const spawn = require('child_process').spawn;
 const Promise = require('bluebird');
 
-flacToMp3=(inputFile, outputFile)=>{
+function flacToMp3(inputFile, outputFile) {
 
   return new Promise((resolve, reject) => {
     const converter = spawn('ffmpeg', ['-y', '-i', inputFile, '-ab', '320k', '-map_metadata', '0', '-id3v2_version', '3', outputFile]);
@@ -23,7 +22,7 @@ flacToMp3=(inputFile, outputFile)=>{
     });
   });
 
-};
+}
 
 flacToMp3('demo.flac', 'demo.mp3')
   .then((file) => {
@@ -32,3 +31,4 @@ flacToMp3('demo.flac', 'demo.mp3')
   .catch((error) => {
     console.log(error);
   });
+
