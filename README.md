@@ -48,6 +48,7 @@ spawn('ffmpeg', ['-y', '-i', 'music.flac', '-ab', '320k', '-map_metadata', '0', 
 
 * Vì chỉ convert từng file một nên cần tách Array chứa đường dẫn file flac để tạo ra folder chứa file mp3 và tìm ra file cần convert.
 * Viết hàm convert file.
+
 ### Kết hợp 2 hàm scanFiles và convertFiles lại: 
 * Vì mỗi hàm chỉ lên đảm nhiệm 1 chức năng duy nhất , nên ta dùng cách này để có thể tùy biến với yêu cầu đặt ra như: file bị lỗi, convert file theo ý muốn, đo thời gian hoàn thành convert  ...
 
