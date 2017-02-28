@@ -55,7 +55,7 @@ spawn('ffmpeg', ['-y', '-i', 'music.flac', '-ab', '320k', '-map_metadata', '0', 
 ## Chú ý:
 * Trong bài toán này đều là xử lý bất đồng bộ, ta không biết quá trình nào sẽ xong trước, ta muốn quá trình xử lý tuần tự thì nên dùng promise kết hợp với Async Await  (trong code viết rất rõ).
 * Để ý thấy bài toán có những bước giống nhau, từ quét file cho đến convert file: quét file trong folder lại gặp 1 folder con, convert xong file này thì lại tiếp tục convert tiếp đến file khác => Có thể dùng đệ quy cho bài toán này.
-* Ở bài toán này khi ta thêm vào vài file flac mới, ta không muốn convert lại những file đã convert rồi thì có vài cách làm: xét trạng thái cho file đầu vào và file đầu ra, từ file đầu ra kiểm tra ngược lại file đầu vào..., nhưng để ý ở trong hàm convert file có sử dụng  ffmpeg, điều ch option giúp ta làm việc này nhanh hơn:  thay tham sô '-y' (overwrite) thành '-n', nó sẽ tự bỏ qua những file  đã convert.  
+* Ở bài toán này khi ta thêm vào vài file flac mới, ta không muốn convert lại những file đã convert rồi thì có vài cách làm: xét trạng thái cho file đầu vào và file đầu ra, từ file đầu ra kiểm tra ngược lại file đầu vào..., nhưng để ý ở trong hàm convert file có sử dụng  ffmpeg, điều chỉnh option giúp ta làm việc này nhanh hơn:  thay tham sô '-y' (overwrite) thành '-n', nó sẽ tự bỏ qua những file  đã convert.  
 * Để tìm ra được thời gian convert, ta tìm tổng số file đầu vào và cho 1 biến đếm , mỗi lần convert file đầu vào cho tăng lên 1(file lỗi cũng tính), cho tới khi nào biến đếm = tổng số file thì coi như tính được thời gian convert, áp dụng logic này có thể sử dụng trong nhiều bài toán khác.
 
 
