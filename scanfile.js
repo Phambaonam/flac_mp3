@@ -4,13 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const Promise = require('bluebird');
 
-exports.ScanFile = class {
+
+exports.scanFile = class {
 
     /*** Constructor
      * @param sourceFolder đường dẫn tới thư mục file flac
      *
      */
-    constructor(sourceFolder) {
+    constructor(sourceFolder){
         this.srcFolder = sourceFolder;
     }
 
@@ -28,24 +29,25 @@ exports.ScanFile = class {
             if (fs.statSync(name).isDirectory()) {
                 this.getFiles(name, files_);
             } else {
-                files_.push(name);
+                let shortName = this.cutPath(name);
+                files_.push(shortName);
             }
         }
         return files_;
     }
 
+    // To make path shorter
+    cutPath(path){
+        return path.replace(this.srcFolder + '/','');
+    }
+
     /***
      * Hàm kiểm tra file .flac
      * @param file
-     * @returns {*}
+     * @returns true/false
      */
-
-    checkFlac(file, extname) {
-        if (path.extname(file) === extname) {
-            return true;
-        } else {
-            return false;
-        }
+    checkFlac(file) {
+        return path.extname(file) === '.flac' ?  true : false;
     }
 
     /***
@@ -53,14 +55,12 @@ exports.ScanFile = class {
      * @param dir
      * @returns {Array}
      */
-
-    addFlac(dir, check) {
+    addFlac(dir,check) {
         return new Promise((resolve, reject) => {
             let allFiles = this.getFiles(dir);
-            //console.log(allFiles);
             let flacFiles = [];
             allFiles.forEach(file => {
-                if (check(file, '.flac')) {
+                if(check(file)){
                     flacFiles.push(file);
                 }
             });
@@ -74,9 +74,8 @@ exports.ScanFile = class {
      * @returns {Promise.<Array>}
      */
     async listAllFlac(dir) {
-        let arrFlac = await this.addFlac(dir, this.checkFlac);
+        let arrFlac = await this.addFlac(dir,this.checkFlac);
         return arrFlac;
+        // console.log(arrFlac);
     }
 };
-
-

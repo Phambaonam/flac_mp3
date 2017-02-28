@@ -1,52 +1,73 @@
 //TODO: File này là file phối hợp giữa scanfile.js và converter.js
-const Converter = require("./converter");
-const ScanFile = require("./scanfile");
+
+let scanFile = require('./scanfile').scanFile;
+let converter = require('./converter').Converter;
+const path = require('path');
+const sourceFolder = __dirname + '/Flac';
+const destFolder = __dirname + '/mp3';
 const writer = require('fs').createWriteStream(__dirname + '/log.txt');
-const srcFolder = __dirname + "/Flac";
-const desFolder = __dirname + "/Mp3";
 let count = 0;
+let fileDone = 0;
+
 /***
- Func chuyển .flac files thành .mp3 files
- Giới hạn 1 files 1 lần convert
- * @param arrFiles : mảng chứa đường dẫn tới các files .flac
+ *  Hàm này dùng để render files mp3 vào folder mp3 tương ứng.
+ * @param arrFlac: Là 1 Array chứa files flac chưa convert.
+ * @param arrMp3 : Là 1 Array chứa  files mp3.
+ * @param convert : Là hàm callback để convert flac.
+ * @param sumFiles : Tổng số file flac.
  */
-
-
-renderFile = (arrFlac, arrMp3, convert) => {
-    let copyFlac = arrFlac.slice(0);
-    let copyMp3 = arrMp3.slice(0);
-    copyFlac.forEach((file, index) => {
-        if (count < 2) {
+renderFile = (arrFlac, arrMp3, convert, sumFiles) => {
+    arrFlac.forEach((file, index) => {
+        let inputFile = convert.sourceFolder + '/' + file;
+        let outputFile = convert.destFolder + '/' + arrMp3[index];
+        // count: chỉ convert 1 file, xong convert tiếp.
+        if (count < 1) {
             count++;
-            arrFlac.shift();
-            arrMp3.shift();
-            convert.flacToMp3(file, copyMp3[index])
+            arrFlac.shift(); // loại bỏ những file đã convert rồi
+            arrMp3.shift();  // loại bỏ những file đã tồn tại
+            convert.flacToMp3(inputFile, outputFile)
                 .then((success) => {
+                    fileDone++;
+                    checkTimeConvert(fileDone, sumFiles);
+                    console.log(file + ' converted completed');
                     count--;
-                    if (arrFlac.length == 0) {
-                        console.timeEnd('check time runner');
-                    }
-                    renderFile(arrFlac, arrMp3, convert);
+                    renderFile(arrFlac, arrMp3, convert, sumFiles);
                 })
-                .catch((error) => {
-                    writer.write(error);
-                    writer.close();
-                    renderFile(arrFlac, arrMp3, convert);
+                .catch((err) => {
+                    fileDone++;
+                    checkTimeConvert(fileDone, sumFiles);
+                    count--;
+                    writer.write(err + '\n');
+                    renderFile(arrFlac, arrMp3, convert, sumFiles);
                 });
         }
     });
 };
+/***
+ *  hàm này dùng để kiểm tra thời gian convert toàn bộ các e
+ * @param countFile : Đếm số file đã quyét.
+ * @param totalFiles : Tổng số file flac.
+ */
+checkTimeConvert = (countFile, totalFiles) => {
+    if (countFile === totalFiles) {
+        console.timeEnd("Sum time converted");
+    }
+};
+/***
+ *  dùng async để đợi tiến trình xử lý xong của hàm listAllFlac()
+ * @param sourceFolder
+ * @param destFolder
+ * @returns {Promise.<void>}
+ */
+async function runner(sourceFolder, destFolder) {
+    let myConvert = new converter(sourceFolder, destFolder);
+    let myScanner = new scanFile(sourceFolder);
+    let filesArrFlac = await myScanner.listAllFlac(sourceFolder);
+    let filesArrMp3 = myConvert.getArrMp3(filesArrFlac);
 
-// Sau khi Merge
-async function runner(srcFolder, desFolder) {
-    let myConvert = new Converter.Converter(srcFolder, desFolder);
-    let myScanner = new ScanFile.ScanFile(srcFolder);
-    let fileArrFlac = await myScanner.listAllFlac(myScanner.srcFolder);
-    let fileArrMp3 = myConvert.getOutputFile(fileArrFlac);
-    renderFile(fileArrFlac, fileArrMp3, myConvert);
-    console.log(countFile);
+    renderFile(filesArrFlac, filesArrMp3, myConvert, filesArrFlac.length);
+
 }
 
-console.time('check time runner');
-runner(srcFolder, desFolder);
-
+console.time("Sum time converted");
+runner(sourceFolder, destFolder);
